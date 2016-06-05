@@ -1,12 +1,12 @@
 DIRINCLUDE=./include
 DIROBJETO=./obj
 CC=gcc
-CFLAGS=-I$(DIRINCLUDE)
+CFLAGS=-I$(DIRINCLUDE) -g
 
-_DEPEND = tad.h instrucao.h
+_DEPEND = arq_reg.h
 DEPEND = $(patsubst %,$(DIRINCLUDE)/%,$(_DEPEND))
 
-_OBJETO = tad.o main.o instrucao.o
+_OBJETO = arq_reg.o main.o
 OBJETO = $(patsubst %,$(DIROBJETO)/%,$(_OBJETO))
 
 $(DIROBJETO)/%.o: %.c $(DEPEND)
