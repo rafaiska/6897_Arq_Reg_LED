@@ -27,6 +27,8 @@ uint16_t Buscar_Registro(char *caminho_registro, uint32_t id)
 		return(ftell(arq_reg) -6);
 	else
 		return 0;
+
+	fclose(arq_reg);
 }
 
 uint16_t Calcular_Tamanho(registro_t registro)
@@ -85,6 +87,23 @@ int Inserir_Registro_Final(FILE *arq_reg, registro_t registro)
 	fputc('|', arq_reg);
 
 	return retorno;
+}
+
+uint16_t Remover_Registro(char *caminho_registro, uint32_t id)
+{
+	FILE *arq_reg;
+	uint16_t posicao;
+
+	posicao = Buscar_Registro(caminho_registro, id);
+
+	arq_reg = Abrir_arquivo(caminho_registro, "a+");
+	fseek(arq_reg, posicao +2, SEEK_SET);
+	fputc('*', arq_reg);
+
+	//TODO: ATUALIZAR LED
+
+	fclose(arq_reg);
+	return posicao;
 }
 
 registro_t String_to_reg(char *cadeia)
@@ -181,5 +200,6 @@ int Importar_arquivo_catalogo(char *caminho_catalogo, char *caminho_registro)
 		++n_reg;
 	}
 
+	fclose(catalogo);
 	return n_reg;
 }

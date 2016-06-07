@@ -29,11 +29,31 @@ void Opcao1()
 	CAMINHO_CATALOGO[i] = '\0';
 
 	if(strlen(CAMINHO_CATALOGO) == 0)
-		Importar_arquivo_catalogo("./res/catalogo.txt", CAMINHO_REGISTRO);
+		i = Importar_arquivo_catalogo("./res/catalogo.txt", CAMINHO_REGISTRO);
 	else
-		Importar_arquivo_catalogo(CAMINHO_CATALOGO, CAMINHO_REGISTRO);
+		i = Importar_arquivo_catalogo(CAMINHO_CATALOGO, CAMINHO_REGISTRO);
 
-	printf("\nArquivo importado com sucesso: registros gravados em '%s'.\n\n", CAMINHO_REGISTRO);
+	printf("\nArquivo importado com sucesso: %d registros gravados em '%s'.\n\n", i, CAMINHO_REGISTRO);
+}
+
+void Opcao3()
+{
+	uint32_t id;
+	uint32_t pos;
+
+	printf("Qual id do registro a ser apagado? ");
+	scanf("%d", &id);
+
+	pos = Remover_Registro(CAMINHO_REGISTRO, id);
+
+	if(pos != 0)
+	{
+		printf("\nRegistro apagado na posicao %d a partir do inicio do arquivo\n\n", pos);
+	}
+	else
+	{
+		printf("Registro nao encontrado!\n\n");
+	}
 }
 
 void Opcao4()
@@ -81,7 +101,7 @@ int main(int argc, char *argv[])
 		{
 			case 1: Opcao1(); break;
 			case 2: break;
-			case 3: break;
+			case 3: Opcao3(); break;
 			case 4: Opcao4(); break;
 			case 5: break;
 			default: printf("Opcao invalida!\n"); break;

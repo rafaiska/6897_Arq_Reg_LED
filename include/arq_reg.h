@@ -30,9 +30,11 @@ typedef struct registro_t {
 	char tipo[32];		//Tipo do trabalho: TCC, Mestrado, Doutorado...
 }registro_t;
 
+uint16_t Buscar_Registro(char *caminho_registro, uint32_t id);
 uint16_t Calcular_Tamanho(registro_t registro);
 int Inserir_Registro(char *caminho_registro, registro_t registro);
 int Inserir_Registro_Final(FILE *arq_reg, registro_t registro);
+uint16_t Remover_Registro(char *caminho_registro, uint32_t id);
 registro_t String_to_reg(char *cadeia);
 FILE *Abrir_arquivo(char *caminho, char *modo);
 int Importar_arquivo_catalogo(char *caminho_catalogo, char *caminho_registro);	//Importa arquivo texto de catalogo com registros
