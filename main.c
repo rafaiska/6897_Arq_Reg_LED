@@ -32,6 +32,28 @@ void Opcao1()
 		Importar_arquivo_catalogo("./res/catalogo.txt", CAMINHO_REGISTRO);
 	else
 		Importar_arquivo_catalogo(CAMINHO_CATALOGO, CAMINHO_REGISTRO);
+
+	printf("\nArquivo importado com sucesso: registros gravados em '%s'.\n\n", CAMINHO_REGISTRO);
+}
+
+void Opcao4()
+{
+	uint32_t id;
+	uint32_t pos;
+
+	printf("Qual id do registro a ser buscado? ");
+	scanf("%d", &id);
+
+	pos = Buscar_Registro(CAMINHO_REGISTRO, id);
+
+	if(pos != 0)
+	{
+		printf("\nRegistro encontrado na posicao %d a partir do inicio do arquivo\n\n", pos);
+	}
+	else
+	{
+		printf("Registro nao encontrado!\n\n");
+	}
 }
 
 int main(int argc, char *argv[])
@@ -60,7 +82,7 @@ int main(int argc, char *argv[])
 			case 1: Opcao1(); break;
 			case 2: break;
 			case 3: break;
-			case 4: break;
+			case 4: Opcao4(); break;
 			case 5: break;
 			default: printf("Opcao invalida!\n"); break;
 		}

@@ -1,5 +1,34 @@
 #include "arq_reg.h"
 
+uint16_t Buscar_Registro(char *caminho_registro, uint32_t id)
+{
+	FILE *arq_reg;
+	uint32_t id_c;
+	uint16_t tamanho_c;
+	int tamanho_arq;
+
+	arq_reg = Abrir_arquivo(caminho_registro, "r");
+
+	fseek(arq_reg, 0, SEEK_END);
+	tamanho_arq = ftell(arq_reg);
+
+	fseek(arq_reg, 2, SEEK_SET);
+	fread(&tamanho_c, sizeof(uint16_t), 1, arq_reg);
+	fread(&id_c, sizeof(uint32_t), 1, arq_reg);
+
+	while(id_c != id && ftell(arq_reg) < tamanho_arq)
+	{
+		fseek(arq_reg, tamanho_c -4, SEEK_CUR);
+		fread(&tamanho_c, sizeof(uint16_t), 1, arq_reg);
+		fread(&id_c, sizeof(uint32_t), 1, arq_reg);
+	}
+
+	if(id_c == id)
+		return(ftell(arq_reg) -6);
+	else
+		return 0;
+}
+
 uint16_t Calcular_Tamanho(registro_t registro)
 {
 	uint16_t retorno = 0;
