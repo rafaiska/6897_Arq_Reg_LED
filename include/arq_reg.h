@@ -30,13 +30,14 @@ typedef struct registro_t {
 	char tipo[32];		//Tipo do trabalho: TCC, Mestrado, Doutorado...
 }registro_t;
 
-uint16_t Buscar_Registro(char *caminho_registro, uint32_t id);
-uint16_t Calcular_Tamanho(registro_t registro);
-int Inserir_Registro(char *caminho_registro, registro_t registro);
-int Inserir_Registro_Final(FILE *arq_reg, registro_t registro);
-uint16_t Remover_Registro(char *caminho_registro, uint32_t id);
-registro_t String_to_reg(char *cadeia);
-FILE *Abrir_arquivo(char *caminho, char *modo);
+uint16_t Buscar_Registro(char *caminho_registro, uint32_t id); //Busca um registro com id especifica a partir do arquivo apontado pelo endereco "caminho_registro"
+uint16_t Calcular_Tamanho(registro_t registro); //Calcula tamanho de um registro para sua insercao. Nao eh chamada diretamente pelo usuario
+uint16_t Inserir_ED(FILE *arq_reg, uint16_t posicao); //Insere um espaco de registro em branco na LED, seguindo a ordem de WORST FIT. Nao eh chamada diretamente pelo usuario
+int Inserir_Registro(char *caminho_registro, registro_t registro); //Insere um registro novo no arquivo
+int Inserir_Registro_Final(FILE *arq_reg, registro_t registro); //Insere um registro no final do arquivo. Nao eh chamada diretamente pelo usuario, mas pela funcao Inserir_Registro(char*, registro_t)
+uint16_t Remover_Registro(char *caminho_registro, uint32_t id); //Remove do arquivo um registro de id especifico
+registro_t String_to_reg(char *cadeia); //Converte uma string do arquivo de catalogo para um registro "struct registro_t"
+FILE *Abrir_arquivo(char *caminho, char *modo); //Funcao para abrir arquivos (tanto de registro quanto de catalogo). Nao eh chamada diretamente pelo usuario
 int Importar_arquivo_catalogo(char *caminho_catalogo, char *caminho_registro);	//Importa arquivo texto de catalogo com registros
 
 #endif

@@ -45,6 +45,70 @@ uint16_t Calcular_Tamanho(registro_t registro)
 	return retorno;
 }
 
+uint16_t Inserir_ED(FILE *arq_reg, uint16_t posicao)
+{
+	uint16_t tamanho, tamanho_ant, tamanho_prox, offset, offset_ant, offset_prox;
+	char c;
+	int nivel = 0;
+
+	fseek(arq_reg, posicao, SEEK_SET);
+	fread(&tamanho, sizeof(uint16_t), 1, arq_reg);
+	c = fgetc(arq_reg);
+
+	putchar(c);
+	if(c != '*')
+	{
+		printf("Erro: Inserindo na LED bloco de registro que nao eh vazio");
+		exit(2);
+	}
+
+	fseek(arq_reg, 0, SEEK_SET);
+	fread(&offset_ant, sizeof(uint16_t), 1, arq_reg);
+
+	if(offset_ant == 0)
+	{
+		fseek(arq_reg, 0, SEEK_SET);
+		fwrite(&posicao, sizeof(uint16_t), 1, arq_reg);
+		fseek(arq_reg, posicao +3, SEEK_SET);
+		offset_prox = 0;
+		fwrite(&offset_prox, sizeof(uint16_t), 1, arq_reg); //ponteiro para o FIM DA LISTA
+	}
+	else
+	{
+		fseek(arq_reg, offset_ant, SEEK_SET);
+		fread(&tamanho_ant, sizeof(uint16_t), 1, arq_reg);
+		fseek(arq_reg, 1, SEEK_CUR); //PULA O CARACTERE '*'
+		fread(&offset_prox, sizeof(uint16_t), 1, arq_reg);
+		if(offset_prox != 0)
+		{
+			fseek(arq_reg, offset_prox, SEEK_SET);
+			fread(&tamanho_prox, sizeof(uint16_t), 1, arq_reg);
+		}
+		++nivel;
+
+		while(tamanho_ant > tamanho && offset_prox != 0)
+		{
+			offset_ant = offset_prox;
+			tamanho_ant = tamanho_prox;
+			fseek(arq_reg, offset_ant, SEEK_SET);
+			fseek(arq_reg, 3, SEEK_CUR); //PULA O TAMANHO E O CARACTERE '*'
+			fread(&offset_prox, sizeof(uint16_t), 1, arq_reg);
+			if(offset_prox != 0)
+			{
+				fseek(arq_reg, offset_prox, SEEK_SET);
+				fread(&tamanho_prox, sizeof(uint16_t), 1, arq_reg);
+			}
+		}
+
+		fseek(arq_reg, offset_ant +3, SEEK_SET);
+		fwrite(&posicao, sizeof(uint16_t), 1, arq_reg);
+		fseek(arq_reg, posicao +3, SEEK_SET);		
+		fwrite(&offset_prox, sizeof(uint16_t), 1, arq_reg);
+		++nivel;
+	}
+	return nivel;
+}
+
 int Inserir_Registro(char *caminho_registro, registro_t registro)
 {
 	FILE *arq_reg;
@@ -93,14 +157,15 @@ uint16_t Remover_Registro(char *caminho_registro, uint32_t id)
 {
 	FILE *arq_reg;
 	uint16_t posicao;
+	char asteristico = '*';
 
 	posicao = Buscar_Registro(caminho_registro, id);
 
 	arq_reg = Abrir_arquivo(caminho_registro, "a+");
-	fseek(arq_reg, posicao +2, SEEK_SET);
-	fputc('*', arq_reg);
+	fseek(arq_reg, posicao +2, SEEK_SET); //Os dois bytes que sinalizam o tamanho do bloco sao mantidos
+	fwrite(&asteristico, sizeof(char), 1, arq_reg); //Esse caractere indica bloco de registro em branco
 
-	//TODO: ATUALIZAR LED
+	Inserir_ED(arq_reg, posicao);
 
 	fclose(arq_reg);
 	return posicao;
