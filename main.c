@@ -36,6 +36,25 @@ void Opcao1()
 	printf("\nArquivo importado com sucesso: %d registros gravados em '%s'.\n\n", i, CAMINHO_REGISTRO);
 }
 
+void Opcao2()
+{
+	registro_t novo;
+
+	printf("\nQual o numero identificador do novo registro? ");
+	scanf("%d", &(novo.id));
+	getchar(); //limpa o buffer de entrada
+	printf("Qual o nome do autor? ");
+	gets(novo.autor);
+	printf("Qual o titulo do trabalho? ");
+	gets(novo.titulo);
+	printf("Qual o curso do autor? ");
+	gets(novo.curso);
+	printf("Qual o tipo do trabalho? ");
+	gets(novo.tipo);
+
+	Inserir_Registro(CAMINHO_REGISTRO, novo); 
+}
+
 void Opcao3()
 {
 	uint32_t id;
@@ -103,7 +122,7 @@ int main(int argc, char *argv[])
 		switch(opcao)
 		{
 			case 1: Opcao1(); break;
-			case 2: break;
+			case 2: Opcao2(); break;
 			case 3: Opcao3(); break;
 			case 4: Opcao4(); break;
 			case 5: break;

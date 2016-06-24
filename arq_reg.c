@@ -177,17 +177,55 @@ int Inserir_Registro(char *caminho_registro, registro_t registro)
 {
 	FILE *arq_reg;
 	uint16_t first_led;
+	uint16_t nova_first_led;
+	uint16_t tamanho, tamanho_first_led, tamanho_novo_branco;
 	int retorno;
 
-	arq_reg = Abrir_arquivo(caminho_registro, "a+");
+	tamanho = Calcular_Tamanho(registro);
+	tamanho_first_led = 0;
+
+	arq_reg = Abrir_arquivo(caminho_registro, "r+");
 	fseek(arq_reg, 0, SEEK_SET);
 	fread(&first_led, sizeof(uint16_t), 1, arq_reg);
 
-	if(first_led == 0)
+	if(first_led != 0)
+	{
+		fseek(arq_reg, first_led, SEEK_SET);
+		fread(&tamanho_first_led, sizeof(uint16_t), 1, arq_reg);
+	}
+
+	if(first_led == 0 || tamanho_first_led < tamanho)
 		retorno = Inserir_Registro_Final(arq_reg, registro);
 	else
 	{
-		//TODO: Percorrer a LED e inserir no primeiro espaco da lista. Atualizar a lista depois
+		fgetc(arq_reg); //PULA O *
+		fread(&nova_first_led, sizeof(uint16_t), 1, arq_reg);
+		fseek(arq_reg, 0, SEEK_SET);
+		fwrite(&nova_first_led, sizeof(uint16_t), 1, arq_reg); //grava no cabecalho o novo primeiro elemento da LED
+
+		fseek(arq_reg, first_led, SEEK_SET);
+		tamanho_novo_branco = tamanho_first_led - tamanho -2; //2 bytes para tamanho do novo registro
+
+		if(tamanho_novo_branco > 8) //cria novo espaco em branco e insere na LED
+		{
+			fwrite(&tamanho_novo_branco, sizeof(uint16_t), 1, arq_reg);
+			Inserir_ED(arq_reg, first_led);
+			fseek(arq_reg, first_led +2 +tamanho_novo_branco, SEEK_SET);
+		}
+		else // cria fragmentacao interna no novo registro
+			tamanho = tamanho_first_led;
+
+		fwrite(&tamanho, sizeof(uint16_t), 1, arq_reg);	
+		fwrite(&(registro.id), sizeof(uint32_t), 1, arq_reg);
+		fputc('|', arq_reg);
+		fwrite(registro.autor, sizeof(char), strlen(registro.autor), arq_reg);
+		fputc('|', arq_reg);
+		fwrite(registro.titulo, sizeof(char), strlen(registro.titulo), arq_reg);
+		fputc('|', arq_reg);
+		fwrite(registro.curso, sizeof(char), strlen(registro.curso), arq_reg);
+		fputc('|', arq_reg);
+		fwrite(registro.tipo, sizeof(char), strlen(registro.tipo), arq_reg);
+		fputc('|', arq_reg);
 	}
 
 	fclose(arq_reg);
