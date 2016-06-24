@@ -30,7 +30,7 @@ typedef struct registro_t {
 	char tipo[32];		//Tipo do trabalho: TCC, Mestrado, Doutorado...
 }registro_t;
 
-uint16_t Buscar_Registro(char *caminho_registro, uint32_t id); //Busca um registro com id especifica a partir do arquivo apontado pelo endereco "caminho_registro"
+uint16_t Buscar_Registro(char *caminho_registro, uint32_t id, registro_t *registro); //Busca um registro com id especifica a partir do arquivo apontado pelo endereco "caminho_registro". Retorna a posicao do registro no arquivo. Se passado parametro "registro_t*" diferente de NULL, escreve o registro encontrado nesse endereco
 uint16_t Calcular_Tamanho(registro_t registro); //Calcula tamanho de um registro para sua insercao. Nao eh chamada diretamente pelo usuario
 uint16_t Inserir_ED(FILE *arq_reg, uint16_t posicao); //Insere um espaco de registro em branco na LED, seguindo a ordem de WORST FIT. Nao eh chamada diretamente pelo usuario
 int Inserir_Registro(char *caminho_registro, registro_t registro); //Insere um registro novo no arquivo
@@ -39,5 +39,6 @@ uint16_t Remover_Registro(char *caminho_registro, uint32_t id); //Remove do arqu
 registro_t String_to_reg(char *cadeia); //Converte uma string do arquivo de catalogo para um registro "struct registro_t"
 FILE *Abrir_arquivo(char *caminho, char *modo); //Funcao para abrir arquivos (tanto de registro quanto de catalogo). Nao eh chamada diretamente pelo usuario
 int Importar_arquivo_catalogo(char *caminho_catalogo, char *caminho_registro);	//Importa arquivo texto de catalogo com registros
+void Imprimir_Registro(registro_t registro);
 
 #endif

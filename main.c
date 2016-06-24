@@ -52,7 +52,7 @@ void Opcao3()
 	}
 	else
 	{
-		printf("Registro nao encontrado!\n\n");
+		printf("\nRegistro nao encontrado!\n\n");
 	}
 }
 
@@ -60,15 +60,18 @@ void Opcao4()
 {
 	uint32_t id;
 	uint32_t pos;
+	registro_t buscado;
 
 	printf("Qual id do registro a ser buscado? ");
 	scanf("%d", &id);
 
-	pos = Buscar_Registro(CAMINHO_REGISTRO, id);
+	pos = Buscar_Registro(CAMINHO_REGISTRO, id, &buscado);
 
 	if(pos != 0)
 	{
-		printf("\nRegistro encontrado na posicao %d a partir do inicio do arquivo\n\n", pos);
+		printf("\nRegistro encontrado na posicao %d (0x%x) a partir do inicio do arquivo\n\n", pos, pos);
+		Imprimir_Registro(buscado);
+		printf("\n");
 	}
 	else
 	{

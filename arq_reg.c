@@ -1,11 +1,15 @@
 #include "arq_reg.h"
 
-uint16_t Buscar_Registro(char *caminho_registro, uint32_t id)
+uint16_t Buscar_Registro(char *caminho_registro, uint32_t id, registro_t *registro)
 {
 	FILE *arq_reg;
 	uint32_t id_c;
 	uint16_t tamanho_c;
 	int tamanho_arq;
+	uint16_t retorno = 2;
+	char is_vazio; //variavel para verificar se registro eh vazio (asterisco *)
+	int i;
+	char c;
 
 	arq_reg = Abrir_arquivo(caminho_registro, "r");
 
@@ -15,20 +19,70 @@ uint16_t Buscar_Registro(char *caminho_registro, uint32_t id)
 	fseek(arq_reg, 2, SEEK_SET);
 	fread(&tamanho_c, sizeof(uint16_t), 1, arq_reg);
 	fread(&id_c, sizeof(uint32_t), 1, arq_reg);
+	fseek(arq_reg, tamanho_c -4, SEEK_CUR);
 
 	while(id_c != id && ftell(arq_reg) < tamanho_arq)
 	{
-		fseek(arq_reg, tamanho_c -4, SEEK_CUR);
+		retorno = ftell(arq_reg);
 		fread(&tamanho_c, sizeof(uint16_t), 1, arq_reg);
-		fread(&id_c, sizeof(uint32_t), 1, arq_reg);
+		is_vazio = fgetc(arq_reg);
+
+		if(is_vazio == '*')
+		{
+			id_c = id+1; // para que id_c seja diferente de id
+			fseek(arq_reg, tamanho_c -1, SEEK_CUR);
+		}
+		else
+		{
+			fseek(arq_reg, -1, SEEK_CUR);
+			fread(&id_c, sizeof(uint32_t), 1, arq_reg);
+			fseek(arq_reg, tamanho_c -4, SEEK_CUR);
+		}
 	}
 
-	if(id_c == id)
-		return(ftell(arq_reg) -6);
-	else
-		return 0;
+	if(id_c != id)
+		retorno = 0;
+	else if(registro != NULL)
+	{
+		fseek(arq_reg, retorno +7, SEEK_SET);
+		registro->id = id_c;
+
+		i=0;
+		while((c = fgetc(arq_reg)) != '|')
+		{
+			registro->autor[i] = c;
+			++i;	
+		}
+		registro->autor[i] = '\0';
+
+		i=0;
+		while((c = fgetc(arq_reg)) != '|')
+		{
+			registro->titulo[i] = c;
+			++i;	
+		}
+		registro->titulo[i] = '\0';
+
+		i=0;
+		while((c = fgetc(arq_reg)) != '|')
+		{
+			registro->curso[i] = c;
+			++i;	
+		}
+		registro->curso[i] = '\0';
+		i=0;
+
+		while((c = fgetc(arq_reg)) != '|')
+		{
+			registro->tipo[i] = c;
+			++i;	
+		}
+		registro->tipo[i] = '\0';
+	}
+
 
 	fclose(arq_reg);
+	return retorno;
 }
 
 uint16_t Calcular_Tamanho(registro_t registro)
@@ -65,7 +119,7 @@ uint16_t Inserir_ED(FILE *arq_reg, uint16_t posicao)
 	fseek(arq_reg, 0, SEEK_SET);
 	fread(&offset_ant, sizeof(uint16_t), 1, arq_reg);
 
-	if(offset_ant == 0)
+	if(offset_ant == 0) //LED VAZIA
 	{
 		fseek(arq_reg, 0, SEEK_SET);
 		fwrite(&posicao, sizeof(uint16_t), 1, arq_reg);
@@ -77,6 +131,16 @@ uint16_t Inserir_ED(FILE *arq_reg, uint16_t posicao)
 	{
 		fseek(arq_reg, offset_ant, SEEK_SET);
 		fread(&tamanho_ant, sizeof(uint16_t), 1, arq_reg);
+
+		if(tamanho_ant < tamanho) //INSERIR NA CABECA
+		{
+			fseek(arq_reg, 0, SEEK_SET);
+			fwrite(&posicao, sizeof(uint16_t), 1, arq_reg);
+			fseek(arq_reg, posicao +3, SEEK_SET);
+			fwrite(&offset_ant, sizeof(uint16_t), 1, arq_reg);
+			return 0;
+		}
+
 		fseek(arq_reg, 1, SEEK_CUR); //PULA O CARACTERE '*'
 		fread(&offset_prox, sizeof(uint16_t), 1, arq_reg);
 		if(offset_prox != 0)
@@ -159,9 +223,11 @@ uint16_t Remover_Registro(char *caminho_registro, uint32_t id)
 	uint16_t posicao;
 	char asteristico = '*';
 
-	posicao = Buscar_Registro(caminho_registro, id);
+	posicao = Buscar_Registro(caminho_registro, id, NULL);
+	if(posicao == 0)
+		return 0;
 
-	arq_reg = Abrir_arquivo(caminho_registro, "a+");
+	arq_reg = Abrir_arquivo(caminho_registro, "r+");
 	fseek(arq_reg, posicao +2, SEEK_SET); //Os dois bytes que sinalizam o tamanho do bloco sao mantidos
 	fwrite(&asteristico, sizeof(char), 1, arq_reg); //Esse caractere indica bloco de registro em branco
 
@@ -267,4 +333,9 @@ int Importar_arquivo_catalogo(char *caminho_catalogo, char *caminho_registro)
 
 	fclose(catalogo);
 	return n_reg;
+}
+
+void Imprimir_Registro(registro_t registro)
+{
+	printf("Numero de registro: %d\nAutor:%s\nTitulo:%s\nCurso:%s\nTipo:%s\n", registro.id, registro.autor, registro.titulo, registro.curso, registro.tipo);
 }
