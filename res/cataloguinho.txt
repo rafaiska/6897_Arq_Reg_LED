@@ -1,3 +1,3 @@
 1; Guilherme Zampronio Alves; Desenvolvimento de instrumentacao para ressonancia magnetica nuclear; Engenharia Eletrica; TCC
 2; Claudio Junior Araujo; Pos-tratamento fisico-quimico de efluentes de reatores anaerobios tratando esgoto; Engenharia Ambiental; TCC
-3; Zaroio Borca; Identificacao de padroes comportamentais homoafetivos em pepinos do mar; Ciencias Sociais; Mestrado
+3; Pepe Zaroio Borca; Identificacao de Padroes Comportamentais Homoafetivos em Pepinos do Mar; Ciencias Sociais; Mestrado
