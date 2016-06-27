@@ -306,7 +306,7 @@ FILE *Abrir_arquivo(char *caminho, char *modo)
 	FILE *arquivo;
 	uint16_t first_led = 0;
 
-	if(modo[0] == 'r')
+	if(strcmp("r", modo) == 0)
 	{
 		arquivo = fopen(caminho,modo);
 		if(arquivo == NULL)
@@ -321,12 +321,19 @@ FILE *Abrir_arquivo(char *caminho, char *modo)
 		arquivo = fopen(caminho,"r");
 
 		//Arquivo de registros com LED nao existe. Cria um arquivo vazio
-		if(arquivo == NULL)	
+		if(arquivo == NULL && strcmp("r+", modo) == 0)	
+		{
+			arquivo = fopen(caminho, "w");
+			fwrite(&first_led, sizeof(uint16_t), 1, arquivo);
+			fclose(arquivo);
+			arquivo = fopen(caminho, modo);
+		}
+		else if(arquivo == NULL)	
 		{
 			arquivo = fopen(caminho, modo);
 			fwrite(&first_led, sizeof(uint16_t), 1, arquivo);
 		}
-		//Abre o arquivo existente em modo de escrita ou append
+		//Abre o arquivo existente em modo de escrita, r+ ou append
 		else
 		{
 			fclose(arquivo);
