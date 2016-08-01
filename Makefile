@@ -10,7 +10,13 @@ _OBJETO = arq_reg.o main.o
 OBJETO = $(patsubst %,$(DIROBJETO)/%,$(_OBJETO))
 
 $(DIROBJETO)/%.o: %.c $(DEPEND)
+	@mkdir -p obj
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 gerenciador_arq_led.out: $(OBJETO)
+	@mkdir -p bin
+	$(CC) -o ./bin/$@ $^ $(CFLAGS)
+
+teste_arvore_b.out: ./obj/arvore_b.o
+	@mkdir -p bin
 	$(CC) -o ./bin/$@ $^ $(CFLAGS)
