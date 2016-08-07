@@ -4,7 +4,7 @@
  * ========== DEPARTAMENTO DE INFORMATICA ============= *
  * ===== 6897 - ORGANIZACAO E RECUPERACAO DE DADOS ==== *
  * ========== PROFESSORA VALERIA FELTRIM ============== *
- * ================== TRABALHO 1 ====================== *
+ * ================== TRABALHO 2 ====================== *
  * Alunos:	Chen Po Hsiang		RA 83473	*
  * 		Rafael Cortez Sanchez	RA 82357	*
  ********************************************************
@@ -27,7 +27,7 @@ editado. Caso nao seja especificado, o padrao usado na execucao eh "./res/rezist
 
 INSTRUCOES PARA A COMPILACAO (WINDOWS):
 
-Usando o MinGW, as instrucoes sao semelhantes aas usadas para compilar no Linux. Para compilar atraves de uma IDE, eh necessario se criar um novo projeto com os arquivos main.c, arq_reg.c e arq_reg.h. Nenhuma biblioteca adicional eh necessaria.
+Usando o MinGW, as instrucoes sao semelhantes aas usadas para compilar no Linux. Para compilar atraves de uma IDE, eh necessario se criar um novo projeto com os arquivos main.c, arq_reg.c, arq_reg.h, arvore_b.c e arvore_b.h. Nenhuma biblioteca adicional eh necessaria.
 
 
 CONTATO
