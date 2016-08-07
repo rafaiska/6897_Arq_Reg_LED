@@ -56,6 +56,8 @@ typedef struct no_arvore_b_t
 	uint16_t filhas[ORDEM_ARVORE]; //RRN das paginas filhas dessa pagina
 }no_arvore_b_t;
 
+uint16_t Buscar_Registro_ArvoreB(char *arquivo, uint32_t id);
+uint16_t Busca_Recursiva_ArvoreB(FILE *arq_arv, uint16_t rrn, uint32_t id, uint16_t *offset);
 uint16_t Carregar_Pagina(FILE *arq_arv, no_arvore_b_t *pagina); //Carrega uma pagina da arvore B contida em arq_arv, assumindo que o ponteiro de arquivo estah no inicio de um registro de pagina. Carrega a pagina na struct correspondente e retorna o RRN da pagina carregada
 uint16_t Criar_Pagina(FILE *arq_arv, no_arvore_b_t nova); //Cria nova pagina no arquivo, inserindo-a no primeiro espaco vazio da PED ou no final do arquivo, caso PED esteja vazia
 uint16_t Escrever_Pagina(FILE *arq_arv, no_arvore_b_t pagina); //Escreve uma pagina da arvore B no arquivo arq_arv, assumindo que o ponteiro de arquivo ja esteja na posicao correta

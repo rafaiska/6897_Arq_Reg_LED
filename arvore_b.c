@@ -1,5 +1,52 @@
 #include "arvore_b.h"
 
+uint16_t Buscar_Registro_ArvoreB(char *arquivo, uint32_t id)
+{
+	FILE *arq_arv;
+	uint16_t raiz;
+	uint16_t offset;
+
+	arq_arv = fopen(arquivo, "r+");
+	fseek(arq_arv, 2, SEEK_SET);
+	fread(&raiz, sizeof(uint16_t), 1, arq_arv);
+
+	if(raiz == 0) //o arquivo de indices estah vazio
+		return 0;
+
+	Busca_Recursiva_ArvoreB(arq_arv, raiz, id, &offset);
+	return offset;
+}
+
+uint16_t Busca_Recursiva_ArvoreB(FILE *arq_arv, uint16_t rrn, uint32_t id, uint16_t *offset)
+{	
+	no_arvore_b_t pagina;
+	int i, chamada;
+
+	if(rrn == 0)
+	{
+		*offset = 0;
+		return 0; 
+	}
+
+	fseek(arq_arv, RRN_to_POS(rrn), SEEK_SET);
+	Carregar_Pagina(arq_arv, &pagina);
+
+	i=0;
+	while(i< pagina.n && id > pagina.id[i])
+		++i;
+
+	if(i< pagina.n)
+	{
+		if(id == pagina.id[i])
+		{
+			*offset = pagina.offset[i];
+			return rrn;
+		}
+	}
+
+	return(Busca_Recursiva_ArvoreB(arq_arv, pagina.filhas[i], id, offset));
+}
+
 uint16_t Carregar_Pagina(FILE *arq_arv, no_arvore_b_t *pagina)
 {
 	uint16_t RRN;
@@ -92,6 +139,7 @@ uint16_t Inserir_No_ArvoreB(char *arquivo, uint32_t id, uint16_t offset)
 					raiz_a.id[0] = promo_key_id;
 					raiz_a.offset[0] = promo_key_offset;
 					raiz_a.filhas[1] = promo_r_child;
+					raiz_a.n = 1;
 					raiz = Criar_Pagina(arq_arv, raiz_a);
 					fseek(arq_arv, 2, SEEK_SET);
 					fwrite(&raiz, sizeof(uint16_t), 1, arq_arv);
@@ -321,6 +369,8 @@ int main()
 	FILE *arvre;
 	uint8_t flag;
 	int i;
+	uint32_t search;
+	uint16_t offset;
 
 	srand(time(NULL));
 	flag = Inicializar_ArvoreB(fileh);
@@ -328,9 +378,21 @@ int main()
 		return 1;
 
 	for(i=0; i< 100; ++i)
-		Inserir_No_ArvoreB(fileh, rand() %100, rand() %0xffff);
+	{
+		Inserir_No_ArvoreB(fileh, rand()%100, rand()%0xffff);
+		Print_Arvore_B(fileh);
+	}	
 
-	Print_Arvore_B(fileh);
+	for(i=0; i< 10; ++i)
+	{
+		search = rand()%100;
+		offset = Buscar_Registro_ArvoreB(fileh, search);
+		if(offset == 0)
+			printf("Registro %d nao encontrado\n", search);
+		else
+			printf("Registro %d encontrado, offset = 0x%04x\n", search, offset);
+	}
+
 	return 0;
 }
 
