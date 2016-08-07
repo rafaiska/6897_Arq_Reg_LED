@@ -5,12 +5,13 @@ char CAMINHO_REGISTRO[256] = "./res/rezistro.rez\0";
 
 void Print_Menu()
 {
-	printf("Escolha uma opcao:\n");
+	printf("\nEscolha uma opcao:\n");
 	printf("\t1. Importar arquivo de catalogo\n");
 	printf("\t2. Adicionar registro ao arquivo\n");
 	printf("\t3. Apagar registro do arquivo\n");
 	printf("\t4. Buscar registro no arquivo\n");
-	printf("\t5. Sair\n");
+	printf("\t5. Imprimir paginas do arquivo de indice\n");
+	printf("\t6. Sair\n");
 }
 
 void Opcao1()
@@ -33,7 +34,7 @@ void Opcao1()
 	else
 		i = Importar_arquivo_catalogo(CAMINHO_CATALOGO, CAMINHO_REGISTRO);
 
-	printf("\nArquivo importado com sucesso: %d registros gravados em '%s'.\n\n", i, CAMINHO_REGISTRO);
+	printf("\nArquivo importado com sucesso: %d registros gravados em '%s'.\n", i, CAMINHO_REGISTRO);
 }
 
 void Opcao2()
@@ -67,11 +68,11 @@ void Opcao3()
 
 	if(pos != 0)
 	{
-		printf("\nRegistro apagado na posicao %d a partir do inicio do arquivo\n\n", pos);
+		printf("\nRegistro apagado na posicao %d a partir do inicio do arquivo\n", pos);
 	}
 	else
 	{
-		printf("\nRegistro nao encontrado!\n\n");
+		printf("\nRegistro nao encontrado!\n");
 	}
 }
 
@@ -84,18 +85,29 @@ void Opcao4()
 	printf("Qual id do registro a ser buscado? ");
 	scanf("%d", &id);
 
-	pos = Buscar_Registro(CAMINHO_REGISTRO, id, &buscado);
+	//pos = Buscar_Registro(CAMINHO_REGISTRO, id, &buscado);
+	pos = Buscar_Registro_Com_Indice(CAMINHO_REGISTRO, id, &buscado);
 
 	if(pos != 0)
 	{
-		printf("\nRegistro encontrado na posicao %d (0x%x) a partir do inicio do arquivo\n\n", pos, pos);
+		printf("\nRegistro encontrado na posicao %d (0x%x) a partir do inicio do arquivo\n", pos, pos);
 		Imprimir_Registro(buscado);
 		printf("\n");
 	}
 	else
 	{
-		printf("Registro nao encontrado!\n\n");
+		printf("\nRegistro nao encontrado!\n");
 	}
+}
+
+void Opcao5()
+{
+	char caminho_indice[128];
+
+	Get_Caminho_Indice(CAMINHO_REGISTRO, caminho_indice);
+	printf("\n==================\nARQUIVO DE INDICES\n==================\n");
+	printf("Armazenado em: %s\n\n", caminho_indice);
+	Print_Arvore_B(caminho_indice);
 }
 
 int main(int argc, char *argv[])
@@ -114,7 +126,7 @@ int main(int argc, char *argv[])
 	printf("Programa editor de arquivos binarios de registros com lista de espacos disponiveis (LED)\n");
 	printf("Arquivo de registro selecionado para edicao: %s\n\n", CAMINHO_REGISTRO);
 
-	while(opcao != 5)
+	while(opcao != 6)
 	{
 		Print_Menu();
 		scanf("%d", &opcao);
@@ -125,7 +137,8 @@ int main(int argc, char *argv[])
 			case 2: Opcao2(); break;
 			case 3: Opcao3(); break;
 			case 4: Opcao4(); break;
-			case 5: break;
+			case 5: Opcao5(); break;
+			case 6: break;
 			default: printf("Opcao invalida!\n"); break;
 		}
 	}

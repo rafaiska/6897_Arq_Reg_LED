@@ -97,4 +97,4 @@
 35; Vinicius Pereira Silva; Estudo numerico e experimental em amortecedores tipo stockbride para linhas de transmissao aereas; Engenharia Mecanica; Mestrado
 51; Edson Ossamu Kageyama; Um sistema de correio eletronico baseado no paradigma peer-to-peer; Informatica; Mestrado
 52; Bruno Giacomet; Otimizacao distribuida de restricoes em ambientes dinamicos; Informatica; Mestrado
-97; Vitor Alexandre Mescolotti; Oscilador sintetizado para a banda de UHF com interface digital; Engenharia Eletrica; TCC
+127; Vitor Alexandre Mescolotti; Oscilador sintetizado para a banda de UHF com interface digital; Engenharia Eletrica; TCC

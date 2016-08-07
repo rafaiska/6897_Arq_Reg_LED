@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include "arvore_b.h"
 
 typedef struct registro_t {
 	uint32_t id;		//Numero identificador do registro (chave primaria)
@@ -31,6 +32,8 @@ typedef struct registro_t {
 }registro_t;
 
 uint16_t Buscar_Registro(char *caminho_registro, uint32_t id, registro_t *registro); //Busca um registro com id especifica a partir do arquivo apontado pelo endereco "caminho_registro". Retorna a posicao do registro no arquivo. Se passado parametro "registro_t*" diferente de NULL, escreve o registro encontrado nesse endereco
+
+uint16_t Buscar_Registro_Com_Indice(char *caminho_registro, uint32_t id, registro_t *registro); //Como a funcao acima, mas utilizando o arquivo de indice para uma busca mais eficiente
 
 uint16_t Calcular_Tamanho(registro_t registro); //Calcula tamanho de um registro para sua insercao. Nao eh chamada diretamente pelo usuario
 
@@ -49,5 +52,7 @@ FILE *Abrir_arquivo(char *caminho, char *modo); //Funcao para abrir arquivos (ta
 int Importar_arquivo_catalogo(char *caminho_catalogo, char *caminho_registro);	//Importa arquivo texto de catalogo com registros. Se o arquivo de registros (destino) ja existir, insere os registros importados nesse arquivo existente
 
 void Imprimir_Registro(registro_t registro); //Imprime na saida padrao um registro_t devidamente formatado
+
+void Get_Caminho_Indice(char *arq_reg, char *arq_idx); //Retorna o caminho de indice em arq_idx, dado um caminho de registro em arq_reg. Exemplo: "./res/exem.idx" de "./res/exem.reg"
 
 #endif

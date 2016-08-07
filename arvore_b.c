@@ -288,8 +288,22 @@ uint8_t Recursive_Insertion(FILE *arq_arv, uint16_t rrn, uint32_t key_id, uint16
 		++i;
 
 	if(i< pagina.n)
+	{
 		if(key_id == pagina.id[i])
-			return INSERTION_ERROR;
+		{
+			if(pagina.offset[i] == 0) //Indice esta aqui, mas essa entrada foi apagada anteriormente
+			{
+				pagina.offset[i] = key_offset;
+				fseek(arq_arv, RRN_to_POS(rrn), SEEK_SET);
+				Escrever_Pagina(arq_arv, pagina);
+				return INSERTION_NO_PROMOTION;			
+			}
+			else
+			{
+				return INSERTION_ERROR;
+			}
+		}
+	}
 
 	pos_insert = i;
 	chamada = Recursive_Insertion(arq_arv, pagina.filhas[pos_insert], key_id, key_offset, promo_r_child, promo_key_id, promo_key_offset);
@@ -332,6 +346,40 @@ uint8_t Recursive_Insertion(FILE *arq_arv, uint16_t rrn, uint32_t key_id, uint16
 	}
 }
 
+uint16_t Remocao_Arvore_B(char *arquivo, uint32_t id)
+{
+	FILE *arq_arv;
+	uint16_t raiz;
+	uint16_t offset;
+	uint16_t rrn;
+	no_arvore_b_t pagina;
+	int i;
+
+	arq_arv = fopen(arquivo, "r+");
+	fseek(arq_arv, 2, SEEK_SET);
+	fread(&raiz, sizeof(uint16_t), 1, arq_arv);
+
+	if(raiz == 0) //o arquivo de indices estah vazio
+		return 0;
+
+	rrn = Busca_Recursiva_ArvoreB(arq_arv, raiz, id, &offset);
+	if(rrn == 0)
+		return 0;
+
+	fseek(arq_arv, RRN_to_POS(rrn), SEEK_SET);
+	Carregar_Pagina(arq_arv, &pagina);
+	
+	i=0;
+	while(pagina.id[i] != id)
+		++i;
+	pagina.offset[i] = 0;
+	fseek(arq_arv, RRN_to_POS(rrn), SEEK_SET);
+	Escrever_Pagina(arq_arv, pagina);
+
+	fclose(arq_arv);
+	return rrn;
+}
+
 void Print_Arvore_B(char *arquivo)
 {
 	int fim, rrn, i;
@@ -344,6 +392,13 @@ void Print_Arvore_B(char *arquivo)
 	fim = ftell(arq_arv);
 	fseek(arq_arv, 2, SEEK_SET);
 	fread(&raiz, sizeof(uint16_t), 1, arq_arv);
+
+	if(raiz == 0)
+	{
+		printf("Arquivo de indices esta vazio!\n");
+		fclose(arq_arv);
+		return;
+	}
 
 	while(ftell(arq_arv) != fim)
 	{
@@ -361,38 +416,5 @@ void Print_Arvore_B(char *arquivo)
 	}
 
 	fclose(arq_arv);
-}
-
-int main()
-{
-	char fileh[] = "./res/arvreb.btr\0";
-	FILE *arvre;
-	uint8_t flag;
-	int i;
-	uint32_t search;
-	uint16_t offset;
-
-	srand(time(NULL));
-	flag = Inicializar_ArvoreB(fileh);
-	if(flag == INICIALIZA_ARVORE_ERRO)
-		return 1;
-
-	for(i=0; i< 100; ++i)
-	{
-		Inserir_No_ArvoreB(fileh, rand()%100, rand()%0xffff);
-		Print_Arvore_B(fileh);
-	}	
-
-	for(i=0; i< 10; ++i)
-	{
-		search = rand()%100;
-		offset = Buscar_Registro_ArvoreB(fileh, search);
-		if(offset == 0)
-			printf("Registro %d nao encontrado\n", search);
-		else
-			printf("Registro %d encontrado, offset = 0x%04x\n", search, offset);
-	}
-
-	return 0;
 }
 

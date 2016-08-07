@@ -1,5 +1,61 @@
 #include "arq_reg.h"
 
+uint16_t Buscar_Registro_Com_Indice(char *caminho_registro, uint32_t id, registro_t *registro)
+{
+	FILE *arq_reg;
+	char caminho_indice[128];
+	uint16_t pos;
+	int i;
+	char c;
+
+	Get_Caminho_Indice(caminho_registro, caminho_indice);
+	pos = Buscar_Registro_ArvoreB(caminho_indice, id);
+
+	if(pos != 0 && registro != NULL)
+	{
+		arq_reg = fopen(caminho_registro, "r");
+		fseek(arq_reg, pos +2, SEEK_SET); //2 bytes do tamanho
+
+		fread(&(registro->id), sizeof(uint32_t), 1, arq_reg);
+		fgetc(arq_reg);
+
+		i=0;
+		while((c = fgetc(arq_reg)) != '|')
+		{
+			registro->autor[i] = c;
+			++i;	
+		}
+		registro->autor[i] = '\0';
+
+		i=0;
+		while((c = fgetc(arq_reg)) != '|')
+		{
+			registro->titulo[i] = c;
+			++i;	
+		}
+		registro->titulo[i] = '\0';
+
+		i=0;
+		while((c = fgetc(arq_reg)) != '|')
+		{
+			registro->curso[i] = c;
+			++i;	
+		}
+		registro->curso[i] = '\0';
+		i=0;
+
+		while((c = fgetc(arq_reg)) != '|')
+		{
+			registro->tipo[i] = c;
+			++i;	
+		}
+		registro->tipo[i] = '\0';
+		fclose(arq_reg);
+	}
+
+	return pos;
+}
+
 uint16_t Buscar_Registro(char *caminho_registro, uint32_t id, registro_t *registro)
 {
 	FILE *arq_reg;
@@ -109,7 +165,6 @@ uint16_t Inserir_ED(FILE *arq_reg, uint16_t posicao)
 	fread(&tamanho, sizeof(uint16_t), 1, arq_reg);
 	c = fgetc(arq_reg);
 
-	putchar(c);
 	if(c != '*')
 	{
 		printf("Erro: Inserindo na LED bloco de registro que nao eh vazio");
@@ -180,6 +235,7 @@ int Inserir_Registro(char *caminho_registro, registro_t registro)
 	uint16_t nova_first_led;
 	uint16_t tamanho, tamanho_first_led, tamanho_novo_branco;
 	int retorno;
+	char caminho_indice[128];
 
 	tamanho = Calcular_Tamanho(registro);
 	tamanho_first_led = 0;
@@ -215,6 +271,7 @@ int Inserir_Registro(char *caminho_registro, registro_t registro)
 		else // cria fragmentacao interna no novo registro
 			tamanho = tamanho_first_led;
 
+		retorno = ftell(arq_reg);
 		fwrite(&tamanho, sizeof(uint16_t), 1, arq_reg);	
 		fwrite(&(registro.id), sizeof(uint32_t), 1, arq_reg);
 		fputc('|', arq_reg);
@@ -229,6 +286,8 @@ int Inserir_Registro(char *caminho_registro, registro_t registro)
 	}
 
 	fclose(arq_reg);
+	Get_Caminho_Indice(caminho_registro, caminho_indice);
+	Inserir_No_ArvoreB(caminho_indice, registro.id, (uint16_t)(retorno));
 	return retorno;
 }
 
@@ -260,8 +319,11 @@ uint16_t Remover_Registro(char *caminho_registro, uint32_t id)
 	FILE *arq_reg;
 	uint16_t posicao;
 	char asteristico = '*';
+	char caminho_indice[128];
 
-	posicao = Buscar_Registro(caminho_registro, id, NULL);
+	//posicao = Buscar_Registro(caminho_registro, id, NULL);
+	posicao = Buscar_Registro_Com_Indice(caminho_registro, id, NULL);
+
 	if(posicao == 0)
 		return 0;
 
@@ -272,6 +334,8 @@ uint16_t Remover_Registro(char *caminho_registro, uint32_t id)
 	Inserir_ED(arq_reg, posicao);
 
 	fclose(arq_reg);
+	Get_Caminho_Indice(caminho_registro, caminho_indice);
+	Remocao_Arvore_B(caminho_indice, id);	
 	return posicao;
 }
 
@@ -305,6 +369,7 @@ FILE *Abrir_arquivo(char *caminho, char *modo)
 {
 	FILE *arquivo;
 	uint16_t first_led = 0;
+	char caminho_indice[128];
 
 	if(strcmp("r", modo) == 0)
 	{
@@ -327,6 +392,8 @@ FILE *Abrir_arquivo(char *caminho, char *modo)
 			fwrite(&first_led, sizeof(uint16_t), 1, arquivo);
 			fclose(arquivo);
 			arquivo = fopen(caminho, modo);
+			Get_Caminho_Indice(caminho, caminho_indice);
+			Inicializar_ArvoreB(caminho_indice);
 		}
 		else if(arquivo == NULL)	
 		{
@@ -382,5 +449,25 @@ int Importar_arquivo_catalogo(char *caminho_catalogo, char *caminho_registro)
 
 void Imprimir_Registro(registro_t registro)
 {
-	printf("Numero de registro: %d\nAutor:%s\nTitulo:%s\nCurso:%s\nTipo:%s\n", registro.id, registro.autor, registro.titulo, registro.curso, registro.tipo);
+	printf("Numero de registro: %d\nAutor: %s\nTitulo: %s\nCurso: %s\nTipo: %s\n", registro.id, registro.autor, registro.titulo, registro.curso, registro.tipo);
+}
+
+void Get_Caminho_Indice(char *arq_reg, char *arq_idx)
+{
+	int i=0;
+
+	if(arq_reg[0] == '.')
+	{
+		arq_idx[0] = '.';
+		++i;
+	}
+
+	while(arq_reg[i] != '.' && arq_reg[i] != '\0')
+	{
+		arq_idx[i] = arq_reg[i];
+		++i;
+	}
+	arq_idx[i] = '\0';
+
+	strcat(arq_idx, ".idx\0");
 }
