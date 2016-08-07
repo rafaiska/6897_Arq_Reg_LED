@@ -40,7 +40,10 @@ uint16_t Busca_Recursiva_ArvoreB(FILE *arq_arv, uint16_t rrn, uint32_t id, uint1
 		if(id == pagina.id[i])
 		{
 			*offset = pagina.offset[i];
-			return rrn;
+			if(*offset == 0)
+				return 0;
+			else
+				return rrn;
 		}
 	}
 
